@@ -57,13 +57,13 @@
               actions: [
                 {
                   action: 'create',
-                  file_path: fileName,
+                  file_path: `unsorted/${fileName}`,
                   content: '',
                   encoding: 'base64'
                 },
                 {
                   action: 'update',
-                  file_path: fileName,
+                  file_path: `unsorted/${fileName}`,
                   content: btoa(String.fromCharCode.apply(null, new Uint8Array(file))),
                   encoding: 'base64'
                 }
