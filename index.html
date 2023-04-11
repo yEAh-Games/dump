@@ -1,56 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Upload a file to GitHub using the API</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Upload to GitHub using API</title>
   </head>
   <body>
-    <h1>Upload a file to GitHub using the API</h1>
-    <input type="file" id="fileInput">
-    <button id="uploadButton">Upload</button>
-    <div id="output"></div>
+    <h1>File Upload to GitHub using API</h1>
+    <input type="file" id="fileInput" />
+    <button onclick="uploadFile()">Upload File</button>
+
     <script>
-      const GITHUB_USERNAME = 'yeah-games';
-      const GITHUB_TOKEN = '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';
-      const REPO_NAME = '1.dump.cloud'; // change this to the name of your repository
-      const REPO_PATH = 'unsorted'; // change this to the path where you want to store the files
+      async function uploadFile() {
+        const fileInput = document.getElementById("fileInput");
+        const file = fileInput.files[0];
+        const content = await file.text();
+        const token = "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";
+        const repo = "yeah-games/dump";
+        const path = "unsorted" + file.name;
 
-      const uploadFile = async (file) => {
-        const fileContent = await file.arrayBuffer();
-        const fileName = file.name;
-        const filePath = `${REPO_PATH}/${fileName}`;
-
-        const content = Array.from(new Uint8Array(fileContent)).map(b => String.fromCharCode(b)).join('');
-        const encodedContent = window.btoa(content);
-
-        await axios.put(`https://api.github.com/repos/yeah-games/1.dump.cloud/contents/unsorted`, {
-          message: `Add ${fileName}`,
-          content: encodedContent
-        }, {
+        const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+        const options = {
+          method: "PUT",
           headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        });
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: "Upload file",
+            content: btoa(unescape(encodeURIComponent(content))),
+          }),
+        };
+
+        const response = await fetch(url, options);
+        const json = await response.json();
+        console.log(json);
       }
-
-      const handleUpload = async () => {
-        const file = document.getElementById('fileInput').files[0];
-
-        if (!file) {
-          document.getElementById('output').innerHTML = 'Please select a file.';
-          return;
-        }
-
-        try {
-          await uploadFile(file);
-          document.getElementById('output').innerHTML = `File uploaded: <a href="https://github.com/${GITHUB_USERNAME}/${REPO_NAME}/tree/main/${REPO_PATH}/${file.name}">${file.name}</a>`;
-        } catch (error) {
-          document.getElementById('output').innerHTML = `Error: ${error.message}`;
-        }
-      }
-
-      document.getElementById('uploadButton').addEventListener('click', handleUpload);
     </script>
   </body>
 </html>
