@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Upload a file to GitHub using Octokit.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/@octokit/rest"></script>
+  </head>
+  <body>
+    <h1>Upload a file to GitHub using Octokit.js</h1>
+    <input type="file" id="fileInput">
+    <button id="uploadButton">Upload</button>
+    <div id="output"></div>
+    <script>
+      const octokit = new Octokit({
+        auth: "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"
+      });
+
+      const handleUpload = async () => {
+        const file = document.getElementById('fileInput').files[0];
+        const repoName = '1.dump.cloud';
+        const repoOwner = 'yeah-games';
+        const filePath = 'unsorted';
+
+        if (!file) {
+          document.getElementById('output').innerHTML = 'Please select a file.';
+          return;
+        }
+
+        try {
+          const fileContent = await file.arrayBuffer();
+          const content = Buffer.from(fileContent).toString('base64');
+
+          const response = await octokit.repos.createOrUpdateFileContents({
+            owner: repoOwner,
+            repo: repoName,
+            path: filePath,
+            message: `Add ${file.name}`,
+            content: content
+          });
+
+          const fileUrl = response.data.content.html_url;
+          document.getElementById('output').innerHTML = `File uploaded: <a href="${fileUrl}">${file.name}</a>`;
+        } catch (error) {
+          document.getElementById('output').innerHTML = `Error: ${error.message}`;
+        }
+      }
+
+      document.getElementById('uploadButton').addEventListener('click', handleUpload);
+    </script>
+  </body>
+</html>
