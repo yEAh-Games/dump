@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+     <!DOCTYPE html>
 <html>
   <head>
     <title>Upload File to GitLab Project</title>
@@ -44,6 +44,38 @@
         .then(upload => {
           console.log(`File uploaded successfully: ${upload.url}`);
           uploadMessage.textContent = `File uploaded successfully: ${upload.url}`;
+          // Add the uploaded file to the project repository
+          const fileContents = new Blob([file]);
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const fileData = event.target.result;
+            const fileDataEncoded = btoa(fileData);
+            const fileUrlEncoded = encodeURIComponent(upload.url);
+            fetch(`${gitlabUrl}/api/v4/projects/${projectId}/repository/files/${file.name}`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${apiToken}`
+              },
+              body: JSON.stringify({
+                branch: 'main',
+                commit_message: `Add ${file.name}`,
+                content: fileDataEncoded,
+                encoding: 'base64'
+              })
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`Failed to add file to repository: ${response.statusText}`);
+              }
+              console.log(`File added to repository: ${file.name}`);
+              uploadMessage.textContent += `\nFile added to repository: ${file.name}`;
+            })
+            .catch(error => {
+              console.error(error);
+              uploadMessage.textContent += `\nFailed to add file to repository: ${error.message}`;
+            });
+          };
+          reader.readAsText(fileContents);
         })
         .catch(error => {
           console.error(error);
