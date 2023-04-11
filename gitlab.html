@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Upload a file to GitLab using the API</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <h1>Upload a file to GitLab using the API</h1>
+    <input type="file" id="fileInput">
+    <button id="uploadButton">Upload</button>
+    <div id="output"></div>
+    <script>
+      const GITLAB_USERNAME = 'yeahgamesdevs';
+      const GITLAB_TOKEN = 'glpat-sXK9eUwhhyr7z2XdS5Yj';
+      const PROJECT_ID = '45086875'; // change this to the ID of your GitLab project
+      const PROJECT_PATH = 'unsorted'; // change this to the path where you want to store the files
+
+      const uploadFile = async (file) => {
+        const fileContent = await file.arrayBuffer();
+        const fileName = file.name;
+        const filePath = `${PROJECT_PATH}/${fileName}`;
+
+        const content = Array.from(new Uint8Array(fileContent)).map(b => String.fromCharCode(b)).join('');
+        const encodedContent = window.btoa(content);
+
+        await axios.post(`https://gitlab.com/api/v4/projects/${PROJECT_ID}/uploads`, {
+          file: encodedContent,
+          filename: fileName,
+          filepath: filePath,
+          auth: 'token',
+          token: GITLAB_TOKEN
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GITLAB_TOKEN}`
+          }
+        });
+      }
+
+      const handleUpload = async () => {
+        const file = document.getElementById('fileInput').files[0];
+
+        if (!file) {
+          document.getElementById('output').innerHTML = 'Please select a file.';
+          return;
+        }
+
+        try {
+          await uploadFile(file);
+          document.getElementById('output').innerHTML = `File uploaded: <a href="https://gitlab.com/${GITLAB_USERNAME}/${PROJECT_ID}/-/tree/main/${PROJECT_PATH}/${file.name}">${file.name}</a>`;
+        } catch (error) {
+          document.getElementById('output').innerHTML = `Error: ${error.message}`;
+        }
+      }
+
+      document.getElementById('uploadButton').addEventListener('click', handleUpload);
+    </script>
+  </body>
+</html>
