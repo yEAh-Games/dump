@@ -23,7 +23,7 @@
         const content = Array.from(new Uint8Array(fileContent)).map(b => String.fromCharCode(b)).join('');
         const encodedContent = window.btoa(content);
 
-        await axios.post(`https://gitlab.com/api/v4/projects/${PROJECT_ID}`, {
+        await axios.post(`https://gitlab.com/api/v4/projects/${PROJECT_ID}/unsorted`, {
           file: encodedContent,
           filename: fileName,
           filepath: filePath,
