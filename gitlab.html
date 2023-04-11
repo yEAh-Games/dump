@@ -14,7 +14,7 @@
     </p>
   </form>
   <div id="upload-message"></div>
-  <script>
+  <script type="text/javascript">
     // Replace the values below with your own GitLab project settings
     const gitlabUrl = 'https://gitlab.com';
     const projectId = '45086875';
@@ -22,13 +22,13 @@
 
     const uploadForm = document.getElementById('upload-form');
     const uploadMessage = document.getElementById('upload-message');
-
     uploadForm.addEventListener('submit', event => {
       event.preventDefault();
       const fileInput = document.querySelector('input[type=file]');
       const file = fileInput.files[0];
       const reader = new FileReader();
-      reader.onloadend = function() {
+      reader.onload = () => {
+        const fileContent = reader.result.split(',')[1];
         const formData = new FormData();
         formData.append('file', file);
         fetch(`${gitlabUrl}/api/v4/projects/${projectId}/uploads`, {
@@ -67,7 +67,7 @@
                 {
                   action: 'update',
                   file_path: `unsorted/${fileName}`,
-                  content: btoa(reader.result),
+                  content: fileContent,
                   encoding: 'base64'
                 }
               ]
