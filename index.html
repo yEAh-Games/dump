@@ -20,9 +20,12 @@
         const fileName = file.name;
         const filePath = `${REPO_PATH}/${fileName}`;
 
+        const content = Array.from(new Uint8Array(fileContent)).map(b => String.fromCharCode(b)).join('');
+        const encodedContent = window.btoa(content);
+
         await axios.put(`https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${filePath}`, {
           message: `Add ${fileName}`,
-          content: Buffer.from(fileContent).toString('base64')
+          content: encodedContent
         }, {
           headers: {
             'Authorization': `token ${GITHUB_TOKEN}`,
