@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Upload File to GitLab Project</title>
-  </head>
-  <body>
-    <h1>Upload File to GitLab Project</h1>
-    <form id="upload-form" enctype="multipart/form-data">
-      <p>
-        <input type="file" name="file">
-      </p>
-      <p>
-        <button type="submit">Upload</button>
-      </p>
-    </form>
-    <div id="upload-message"></div>
-    <script>
+<head>
+<title>Upload File to GitLab Project</title>
+</head>
+<body>
+<h1>Upload File to GitLab Project</h1>
+<form id="upload-form" enctype="multipart/form-data">
+<p>
+<input type="file" name="file">
+</p>
+<p>
+<button type="submit">Upload</button>
+</p>
+</form>
+<div id="upload-message"></div>
+<script type="text/javascript">
       // Replace the values below with your own GitLab project settings
       const gitlabUrl = 'https://gitlab.com';
       const projectId = '45086875';
@@ -64,7 +64,7 @@
                 {
                   action: 'update',
                   file_path: `unsorted/${fileName}`,
-                  content: btoa(String.fromCharCode.apply(null, new Uint8Array(file))),
+                  content: btoa(unescape(encodeURIComponent(file))),
                   encoding: 'base64'
                 }
               ]
@@ -91,5 +91,6 @@
         });
       });
     </script>
-  </body>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="fea932bc4a674cc5c1e0eff3-|49" defer=""></script>
+</body>
 </html>
