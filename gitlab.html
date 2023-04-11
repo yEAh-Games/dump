@@ -13,13 +13,15 @@
         <button type="submit">Upload</button>
       </p>
     </form>
+    <div id="upload-message"></div>
     <script>
       // Replace the values below with your own GitLab project settings
       const gitlabUrl = 'https://gitlab.com';
       const projectId = '45086875';
-      const apiToken = 'glpat-sXK9eUwhhyr7z2XdS5Yj';
+      const apiToken = 'glpat-8qvrxD1ZL8yP6bTyCzKq';
 
       const uploadForm = document.getElementById('upload-form');
+      const uploadMessage = document.getElementById('upload-message');
       uploadForm.addEventListener('submit', event => {
         event.preventDefault();
         const fileInput = document.querySelector('input[type=file]');
@@ -41,10 +43,11 @@
         })
         .then(upload => {
           console.log(`File uploaded successfully: ${upload.url}`);
-          // Do something with the upload URL, e.g. save it to a database
+          uploadMessage.textContent = `File uploaded successfully: ${upload.url}`;
         })
         .catch(error => {
           console.error(error);
+          uploadMessage.textContent = `Failed to upload file: ${error.message}`;
         });
       });
     </script>
