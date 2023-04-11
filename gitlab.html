@@ -2,7 +2,6 @@
 <html>
   <head>
     <title>Upload File to GitLab Project</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   </head>
   <body>
     <h1>Upload File to GitLab Project</h1>
@@ -30,48 +29,47 @@
         const formData = new FormData();
         formData.append('file', file);
         fetch(`${gitlabUrl}/api/v4/projects/${projectId}/uploads`, {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${apiToken}`
-  },
-  body: formData
-})
-.then(response => {
-  if (!response.ok) {
-    throw new Error(`Failed to upload file: ${response.statusText}`);
-  }
-  return response.json();
-})
-.then(upload => {
-  console.log(`File uploaded successfully: ${upload.url}`);
-  uploadMessage.textContent = `File uploaded successfully: ${upload.url}`;
-  const fileName = upload.url.split('/').pop();
-  
-  // Make a POST request to add the upload path to a database
-  axios.post(`${gitlabUrl}/api/v4/projects/${projectId}/issues`, {
-    title: 'New Upload',
-    description: upload.url,
-    labels: ['upload']
-  }, {
-    headers: {
-      'Authorization': `Bearer ${apiToken}`,
-      'Content-Type': 'application/json'
-    }
-  })
-  .then(response => {
-    console.log(`Upload path added to database: ${response.data.web_url}`);
-    uploadMessage.textContent = `File uploaded successfully and upload path added to database: ${upload.url}`;
-  })
-  .catch(error => {
-    console.error(error);
-    uploadMessage.textContent = `Failed to add upload path to database: ${error.message}`;
-  });
-})
-.catch(error => {
-  console.error(error);
-  uploadMessage.textContent = `Failed to upload file: ${error.message}`;
-});
-
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`
+          },
+          body: formData
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to upload file: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(upload => {
+          console.log(`File uploaded successfully: ${upload.url}`);
+          uploadMessage.textContent = `File uploaded successfully: ${upload.url}`;
+          const fileName = upload.url.split('/').pop();
+          fetch(`${gitlabUrl}/api/v4/projects/${projectId}/repository/commits`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              branch: 'main',
+              commit_message: `Add ${fileName} to unsorted folder`,
+              actions: [
+                {
+                  action: 'create',
+                  file_path: `unsorted/${fileName}`,
+                  content: '',
+                  encoding: 'base64'
+                },
+                {
+                  action: 'update',
+                  file_path: `unsorted/${fileName}`,
+                  content: btoa(String.fromCharCode.apply(null, new Uint8Array(file))),
+                  encoding: 'base64'
+                }
+              ]
+            })
+          })
           .then(response => {
             if (!response.ok) {
               throw new Error(`Failed to create commit: ${response.statusText}`);
