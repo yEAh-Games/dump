@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Upload a file to GitHub using the API</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <h1>Upload a file to GitHub using the API</h1>
+    <input type="file" id="fileInput">
+    <button id="uploadButton">Upload</button>
+    <div id="output"></div>
+    <script>
+      const GITHUB_USERNAME = 'yeah-games';
+      const GITHUB_TOKEN = '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';
+      const REPO_NAME = '1.dump.cloud'; // change this to the name of your repository
+      const REPO_PATH = 'unsorted'; // change this to the path where you want to store the files
+
+      const uploadFile = async (file) => {
+        const fileContent = await file.arrayBuffer();
+        const fileName = file.name;
+        const filePath = `${REPO_PATH}/${fileName}`;
+
+        await axios.put(`https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${filePath}`, {
+          message: `Add ${fileName}`,
+          content: Buffer.from(fileContent).toString('base64')
+        }, {
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+      }
+
+      const handleUpload = async () => {
+        const file = document.getElementById('fileInput').files[0];
+
+        if (!file) {
+          document.getElementById('output').innerHTML = 'Please select a file.';
+          return;
+        }
+
+        try {
+          await uploadFile(file);
+          document.getElementById('output').innerHTML = `File uploaded: <a href="https://github.com/${GITHUB_USERNAME}/${REPO_NAME}/tree/main/${REPO_PATH}/${file.name}">${file.name}</a>`;
+        } catch (error) {
+          document.getElementById('output').innerHTML = `Error: ${error.message}`;
+        }
+      }
+
+      document.getElementById('uploadButton').addEventListener('click', handleUpload);
+    </script>
+  </body>
+</html>
