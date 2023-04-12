@@ -13,6 +13,7 @@
       <button type="submit">Upload</button>
     </p>
   </form>
+  <div id="upload-progress"></div>
   <div id="upload-message"></div>
   <script type="text/javascript">
     // Replace the values below with your own GitLab project settings
@@ -21,6 +22,7 @@
     const apiToken = 'glpat-8qvrxD1ZL8yP6bTyCzKq';
 
     const uploadForm = document.getElementById('upload-form');
+    const uploadProgress = document.getElementById('upload-progress');
     const uploadMessage = document.getElementById('upload-message');
     uploadForm.addEventListener('submit', event => {
       event.preventDefault();
@@ -35,6 +37,27 @@
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiToken}`
+          },
+          body: formData
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to upload file: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(upload => {
+          console.log(`File uploaded successfully: ${upload.url}`);
+          uploadMessage.textContent = `File uploaded successfully: ${upload.url}`;
+          const fileName = upload.url.split('/').pop();
+          const progressBar = document.createElement('progress');
+          progressBar.max = 100;
+          uploadProgress.appendChild(progressBar);
+          fetch(`${gitlabUrl}/api/v4/projects/${projectId}/uploads`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'X-Requested-With': 'XMLHttpRequest'
           },
           body: formData
         })
