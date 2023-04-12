@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Upload File to GitLab Project</title>
+  <title>Upload files to the Archives | Dump • Library / yEAh Network</title>
 </head>
 <body>
-  <h1>Upload File to GitLab Project</h1>
+  <h1>Upload any file to the Archives for processing and publishing</h1>
   <form id="upload-form" enctype="multipart/form-data">
     <p>
       <input type="file" name="file">
@@ -14,6 +14,89 @@
     </p>
   </form>
   <div id="upload-message"></div>
-  <script type="text/javascript" src="./upload.js">
-   </body>
+  <script type="text/javascript">
+    // Replace the values below with your own GitLab project settings
+    const gitlabUrl = 'https://gitlab.com';
+    const projectId = '45086875';
+    const apiToken = 'glpat-8qvrxD1ZL8yP6bTyCzKq';
+
+    const uploadForm = document.getElementById('upload-form');
+    const uploadMessage = document.getElementById('upload-message');
+    uploadForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const fileInput = document.querySelector('input[type=file]');
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const fileContent = reader.result.split(',')[1];
+        const formData = new FormData();
+        formData.append('file', file);
+        fetch(`${gitlabUrl}/api/v4/projects/${projectId}/uploads`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`
+          },
+          body: formData
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to upload file: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(upload => {
+          console.log(`File uploaded successfully: ${upload.url}`);
+          uploadMessage.textContent = `File uploaded successfully: ${upload.url}`;
+          const fileName = upload.url.split('/').pop();
+          fetch(`${gitlabUrl}/api/v4/projects/${projectId}/repository/commits`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              branch: 'main',
+              commit_message: `Add ${fileName} to unsorted folder`,
+              actions: [
+                {
+                  action: 'create',
+                  file_path: `unsorted/${fileName}`,
+                  content: '',
+                  encoding: 'base64'
+                },
+                {
+                  action: 'update',
+                  file_path: `unsorted/${fileName}`,
+                  content: fileContent,
+                  encoding: 'base64'
+                }
+              ]
+            })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to create commit: ${response.statusText}`);
+            }
+            return response.json();
+          })
+          .then(commit => {
+            console.log(`Commit created successfully: ${commit.web_url}`);
+            uploadMessage.textContent = `File uploaded and committed successfully: ${commit.web_url}`;
+          })
+          .catch(error => {
+            console.error(error);
+            uploadMessage.textContent = `Failed to upload and commit file: ${error.message}`;
+          });
+        })
+        .catch(error => {
+          console.error(error);
+          uploadMessage.textContent = `Failed to upload file: ${error.message}`;
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
 </html>
+
+there's the code, add progress bars, but stop writing the code when it hits exactly 2000 characters, then when I tell you to continue, you have to continue directly from where you left off before. exactly. as in the same characrter. understood?
