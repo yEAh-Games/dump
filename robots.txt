@@ -1,0 +1,6 @@
+Sitemap: https://dump.yeahgames.net/sitemap.xml
+
+User-agent: *
+Disallow: /cdn-cgi/
+Disallow: /cdn-cgi
+Disallow: /cdn-cgi/*
